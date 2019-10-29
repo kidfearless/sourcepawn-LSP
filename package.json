@@ -1,0 +1,44 @@
+{
+	"name": "sourcepawn-language-support",
+	"description": "Basic autocompletion support for sourpawn",
+	"author": "KiD Fearless",
+	"license": "MIT",
+	"version": "1.0.0",
+	"repository":
+	{
+		"type": "git",
+		"url": ""
+	},
+	"publisher": "KiD Fearless",
+	"categories": [],
+	"keywords": [],
+	"engines":
+	{
+		"vscode": "^1.33.0"
+	},
+	"activationEvents":
+	[
+		"onLanguage:sourcepawn"
+	],
+	"main": "./client/out/extension",
+	"contributes": {},
+	"scripts":
+	{
+		"vscode:prepublish": "cd client && npm run update-vscode && cd .. && npm run compile",
+		"compile": "tsc -b",
+		"watch": "tsc -b -w",
+		"postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
+		"test": "sh ./scripts/e2e.sh"
+	},
+	"devDependencies":
+	{
+		"@types/mocha": "^5.2.0",
+		"@types/node": "^8.0.0",
+		"tslint": "^5.16.0",
+		"typescript": "^3.5.1"
+	},
+	"dependencies":
+	{
+		"vscode-languageserver": "^5.2.1"
+	}
+}

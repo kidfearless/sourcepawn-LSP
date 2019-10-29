@@ -1,0 +1,18 @@
+{
+	"name": "sourcepawn-language-support-server",
+	"description": "Server part of the extension",
+	"version": "1.0.0",
+	"author": "KiD Fearless",
+	"license": "MIT",
+	"engines": {
+		"node": "*"
+	},
+	"repository": {
+		"type": "git",
+		"url": ""
+	},
+	"dependencies": {
+		"vscode-languageserver": "^5.2.1"
+	},
+	"scripts": {}
+}
