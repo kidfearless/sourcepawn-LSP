@@ -46,9 +46,9 @@ export function FindComments(textDocument: TextDocument)
 	}
 	
 	// ok, I might be over relying on regex for this, but it's so simple and convienent
-	let singleLineCommentRegex:RegExp = /\/\/.*\n/g;
+	let singleLineCommentRegex:RegExp = /\/\/.*$/gm;
 	// add the line comments to the list
-	while ((match = blockCommentRegex.exec(text)))
+	while ((match = singleLineCommentRegex.exec(text)))
 	{
 		// create a position from the character index of the file
 		let stringStart: Position = textDocument.positionAt(match.index);
@@ -60,10 +60,10 @@ export function FindComments(textDocument: TextDocument)
 		let stringRange: Range = Range.create(stringStart, stringEnd);
 
 		// We're using LocationLinks instead of ranges because this will be expanded to includes and we'll need to track where we found these files.
-		let location = LocationLink.create(textDocument.uri, stringRange, stringRange);
+		let loc = LocationLink.create(textDocument.uri, stringRange, stringRange);
 
 		// add the location of the string to the list.
-		g_CommentLocations.push(location);
+		g_CommentLocations.push(loc);
 	}
 }
 
