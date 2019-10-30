@@ -35,10 +35,12 @@ import
 import * as Defininitions from "./parser/defines";
 import * as MethodMaps from "./parser/methodmaps";
 import * as Variables from "./parser/variables";
-import * as path from "path";
-import * as fs from 'fs';
-import { HandlerResult } from 'vscode-jsonrpc';
-
+import * as Comments from "./parser/comments";
+import * as Strings from "./parser/strings";
+import
+{
+	LinkLocationToString
+} from './utils';
 
 // Creates a new connection to the client for all current and proposed features.
 // We won't use them all but it makes it easier
@@ -50,6 +52,9 @@ let documents: TextDocuments = new TextDocuments();
 // for open, change and close text document events
 documents.listen(connection);
 let completions:CompletionItem[] = [];
+
+// Listen on the connection
+connection.listen();
 
 function OnInitialize(params: InitializeParams): InitializeResult
 {
@@ -83,6 +88,23 @@ connection.onInitialize(OnInitialize);
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(function(change: TextDocumentChangeEvent)
 {
+	Strings.FindStrings(change.document);
+	Comments.FindComments(change.document);
+	Strings.g_StringLocations.forEach(
+		function(location: LocationLink)
+		{
+			connection.console.log('string found at');
+			connection.console.log(LinkLocationToString(location));
+		}
+	);
+	Comments.g_CommentLocations.forEach(
+		function(loc: LocationLink)
+		{
+			connection.console.log('comment found at');
+			connection.console.log(LinkLocationToString(loc));
+		}
+	);
+
 	Defininitions.FindDefines(change.document);
 	MethodMaps.FindMethodMaps(change.document);
 	Variables.FindVariables(change.document);
@@ -133,30 +155,3 @@ connection.onCompletionResolve(
 	}
 );
 
-// Listen on the connection
-connection.listen();
-
-
-async function validateTextDocument(textDocument: TextDocument): Promise<void>
-{
-	// The validator creates diagnostics for all uppercase words length 2 and more
-	let text = textDocument.getText();
-	let definePattern = /\#define\s+\w+/g;
-	let match: RegExpExecArray | null;
-
-	let problems = 0;
-	while ((match = definePattern.exec(text)) && problems < 10)
-	{
-		problems++;
-		// extract the define name from the match
-		let defineVariable = match[0].replace('#define', '').trim();
-		// find the location of the name inside the orignal match.
-		// this is for people who like to tab so much that their defines are right alligned
-		let indexof = match[0].indexOf(defineVariable);
-
-		let completion: CompletionItem = CompletionItem.create(defineVariable);
-		completion.kind = CompletionItemKind.Constant;
-		completion.deprecated = true;
-		completions.push(completion);
-	}	
-}

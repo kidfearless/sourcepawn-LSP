@@ -7,7 +7,6 @@ import
 	LocationLink
 } from 'vscode-languageserver';
 // need the range.contains method for vscode
-import * as vscode from 'vscode';
 
 export var g_StringLocations: LocationLink[] = [];
 
@@ -46,39 +45,37 @@ export function FindStrings(textDocument: TextDocument)
 }
 
 // Tests whether the given locationlink is found within one of the cached strings
-// Does not check if the given string is contained within a comment though
-export function IsLocationLinkInString(testLocation:LocationLink):boolean
+// Does not check if the given comment is inside a string
+export function IsLocationLinkInComment(testLocation:LocationLink):boolean
 {
 	// Loop through each string location we have saved
-	g_StringLocations.forEach(
-		function(stringLocation:LocationLink)
-		{
-			// Validate that they are the same document first
-			if(stringLocation.targetUri === testLocation.targetUri)
-			{
-				// cast the language server range to a vscode range
-				let stringRange: vscode.Range = new vscode.Range(
-					stringLocation.targetRange.start.line,
-					stringLocation.targetRange.start.character,
-					stringLocation.targetRange.end.line,
-					stringLocation.targetRange.end.character
-				);
-				let testRange: vscode.Range = new vscode.Range(
-					testLocation.targetRange.start.line,
-					testLocation.targetRange.start.character,
-					testLocation.targetRange.end.line,
-					testLocation.targetRange.end.character
-				);
+	for(let i = 0; i < g_StringLocations.length; ++i)
+	{
+		let stringLocation = g_StringLocations[i];
 
-				// Check if the range we are testing is contained inside a string
-				// What happens if one of the end position is outside the string???
-				if(stringRange.contains(testRange))
-				{
-					return true;
-				}
-			}
+		// Validate that they are the same document first
+		if(stringLocation.targetUri !== testLocation.targetUri)
+		{
+			continue;
 		}
-	);
+		// if the position's line starts before our string's start line then we continue
+		// if the position's line ends after our string's end line then we continue
+		if( testLocation.targetRange.start.line < stringLocation.targetRange.start.line ||
+			testLocation.targetRange.end.line 	> stringLocation.targetRange.end.line )
+		{
+			continue;
+		}
+		// same check as before but with characters. The lines are the same, now we're checking if the characters are inside
+		if( testLocation.targetRange.start.character < stringLocation.targetRange.start.character ||
+			testLocation.targetRange.end.character   > stringLocation.targetRange.end.character )
+		{
+			continue;
+		}
+
+		// passed negative validation.
+		// the test location is within the same document, both lines are within the target range, smae with the characters. so we must be inside a comment.
+		return true;
+	}
 
 	// wow we did all that work and found nothing, oh well guess that location is safe
 	return false;
