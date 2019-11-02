@@ -45,22 +45,24 @@ export function activate(context: ExtensionContext)
 	{
 		// Register the server for plain text documents
 		documentSelector:
-		[{
-			language: 'typescript',
-			pattern: '*.{sp,inc}'
-		}],
+		[
+			{
+				scheme: 'file',
+				language: 'plaintext'
+			}
+		],
 		synchronize:
 		{
-			configurationSection: 'sourcepawnLSP',
-			fileEvents: [workspace.createFileSystemWatcher('**/*.sp'), workspace.createFileSystemWatcher('**/*.inc')]
+			// Notify the server about file changes to '.clientrc files contained in the workspace
+			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
 		}
 	};
 
 	// Create the language client and start the client.
-	client = new LanguageClient('sourcepawnLSP', 'Sourcepawn Language Server', serverOptions, clientOptions);
+	client = new LanguageClient('languageServerExample', 'Language Server Example', serverOptions, clientOptions);
 
 	// Start the client. This will also launch the server
-	context.subscriptions.push(client.start());
+	client.start();
 }
 
 export function deactivate(): Thenable<void> | undefined
