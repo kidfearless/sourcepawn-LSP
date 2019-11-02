@@ -55,14 +55,14 @@
                     ".sp",
                     ".inc"
                 ],
-                "configuration": "./language-configuration.json"
+                "configuration": "./client/language-configuration.json"
             }
         ],
         "grammars": [
             {
                 "language": "sourcepawn",
                 "scopeName": "source.sourcepawn",
-                "path": "./syntaxes/sourcepawn.tmLanguage.json"
+                "path": "./client/syntaxes/sourcepawn.tmLanguage.json"
             }
         ]
 	},
