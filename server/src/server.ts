@@ -30,6 +30,7 @@ import
 	Range,
 	Location,
 	Position,
+	CompletionParams,
 } from 'vscode-languageserver';
 
 import * as Defininitions from "./parser/defines";
@@ -37,9 +38,12 @@ import * as MethodMaps from "./parser/methodmaps";
 import * as Variables from "./parser/variables";
 import * as Comments from "./parser/comments";
 import * as Strings from "./parser/strings";
+
 import
 {
-	LinkLocationToString
+	LinkLocationToString,
+	IsStringTrigger,
+	IsDotTrigger
 } from './utils';
 
 // Creates a new connection to the client for all current and proposed features.
@@ -51,7 +55,7 @@ let documents: TextDocuments = new TextDocuments();
 // Make the text document manager listen on the connection
 // for open, change and close text document events
 documents.listen(connection);
-let completions:CompletionItem[] = [];
+
 
 // Listen on the connection
 connection.listen();
@@ -68,7 +72,8 @@ function OnInitialize(params: InitializeParams): InitializeResult
 			// Tell the client that the server supports code completion
 			completionProvider:
 			{
-				resolveProvider: false
+				resolveProvider: true,
+				triggerCharacters: ['.']
 			}
 			// We aren't there yet
 			/* ,
@@ -90,7 +95,7 @@ documents.onDidChangeContent(function(change: TextDocumentChangeEvent)
 {
 	Strings.FindStrings(change.document);
 	Comments.FindComments(change.document);
-	Strings.g_StringLocations.forEach(
+	/* Strings.g_StringLocations.forEach(
 		function(location: LocationLink)
 		{
 			connection.console.log('string found at');
@@ -100,11 +105,11 @@ documents.onDidChangeContent(function(change: TextDocumentChangeEvent)
 	Comments.g_CommentLocations.forEach(
 		function(loc: LocationLink)
 		{
-			connection.console.log('comment found at');
+			connection.client.connection.console.log('comment found at');
 			connection.console.log(LinkLocationToString(loc));
 		}
 	);
-
+ */
 	Defininitions.FindDefines(change.document);
 	MethodMaps.FindMethodMaps(change.document);
 	Variables.FindVariables(change.document);
@@ -118,12 +123,36 @@ connection.onDidChangeWatchedFiles(function(_change)
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
-	function(textDocumentPosition: TextDocumentPositionParams): CompletionItem[]
+	function(textDocumentPosition: CompletionParams): CompletionItem[]
 	{
 		let defines = Defininitions.GetDefines();
 		let methodmaps = MethodMaps.GetMethodMaps();
 		let variables = Variables.GetVariables();
-		return defines.concat(methodmaps).concat(variables);
+		let myClass: CompletionItem = CompletionItem.create('MyClass');
+		myClass.kind = CompletionItemKind.Class;
+
+		let doc: TextDocument|undefined = documents.get(textDocumentPosition.textDocument.uri);
+		if(doc !== undefined)
+		{
+			let lineItem:string = doc.getText(Range.create(textDocumentPosition.position.line, 0, textDocumentPosition.position.line, textDocumentPosition.position.character));
+			//if(IsStringTrigger('MyClass', lineItem, textDocumentPosition.position.character)/*  && IsDotTrigger(lineItem, textDocumentPosition.position.character) !== false */)
+			{
+				let lengthCompletion: CompletionItem = CompletionItem.create('Length');
+				lengthCompletion.kind = CompletionItemKind.Property;
+				methodmaps = methodmaps.concat(lengthCompletion);
+			}
+
+		}
+		else
+		{
+			connection.console.log('undefined document');
+		}
+		
+		//completion.filterText = completion.insertText = 'MyClass.Length';
+		//completion.kind = CompletionItemKind.Property;
+		// completion.commitCharacters = ['.'];
+		return defines.concat(methodmaps).concat(variables).concat(myClass);
+
 	}
 );
 
