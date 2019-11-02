@@ -39,7 +39,7 @@ export function FindMethodMaps(textDocument: TextDocument): void
 	
 	// create a pattern to match 'methodmap' and a series of characters with any number of whitespace in-between
 	// this is because using match groups will cause exec to always return the same match
-	let definePattern: RegExp = /methodmap\s+\w+/g;
+	let definePattern: RegExp = /methodmap\s+\w+(\s*<\s*\w+)?\s*{/g;
 
 	// Holds an array of matches from the definePattern above
 	// Due to how it's written it will only ever hold one value
