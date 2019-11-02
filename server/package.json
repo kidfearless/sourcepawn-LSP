@@ -1,15 +1,15 @@
 {
-	"name": "lsp-sample-server",
+	"name": "sourcepawn-lsp-server",
 	"description": "Example implementation of a language server in node.",
-	"version": "1.0.0",
-	"author": "Microsoft Corporation",
+	"version": "0.0.1",
+	"author": "KiD Fearless",
 	"license": "MIT",
 	"engines": {
 		"node": "*"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-extension-samples"
+		"url": "https://github.com/kidfearless/sourcepawn-LSP"
 	},
 	"dependencies": {
 		"vscode": "^1.1.36",
