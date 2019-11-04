@@ -30,3 +30,25 @@ export function IsDotTrigger(line: string, character: number): boolean|number
 	}
 	return false;
 }
+
+export function FindClosingBrace(source: string, startPoint:number): number
+{
+	let endPoint = startPoint;
+	let braceCount = 1;
+	for (; endPoint < source.length; ++endPoint)
+	{
+		if (source[endPoint] === '{')
+		{
+			++braceCount;
+		}
+		else if (source[endPoint] === '}')
+		{
+			--braceCount;
+		}
+		if (braceCount == 0)
+		{
+			return endPoint;
+		}
+	}
+	return endPoint;
+}
