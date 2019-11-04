@@ -26,6 +26,7 @@ import
 
 import {Variable} from '../classes';
 import {connection} from '../server';
+import {LinkLocationToString} from '../utils';
 export var g_Variables: Variable[] = [];
 
 // Finds all the defines in the current text document and saves them the g_Defines
@@ -105,6 +106,8 @@ function FindBaseVariables(textDocument: TextDocument, text: string): void
 
 				// link it with the Variable object
 				newVariable.declarationLocation = variableLocation;
+
+				newVariable.description = LinkLocationToString(variableLocation);
 				
 				// add it to the list of definitions
 				g_Variables.push(newVariable);

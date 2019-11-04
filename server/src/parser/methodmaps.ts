@@ -25,38 +25,50 @@ import
 } from 'vscode-languageserver';
 
 import {Variable} from '../classes';
+import {FindClosingBrace} from '../utils';
 
-export var g_MethodMaps: Variable[] = [];
+export var g_MethodMaps: Map<string, Variable> = new Map();
 
 // Finds all the defines in the current text document and saves them the g_Defines
 export function FindMethodMaps(textDocument: TextDocument): void
 {
-	// clear the current array to prevent duplicates
-	g_MethodMaps = [];
-
 	// get the current document as one long string
 	let text:string = textDocument.getText();
 	
-	// create a pattern to match 'methodmap' and a series of characters with any number of whitespace in-between
-	// this is because using match groups will cause exec to always return the same match
-	let definePattern: RegExp = /methodmap\s+\w+(\s*<\s*\w+)?\s*{/g;
-
+	// creates a methodmap patter that matches 'methodmap' and at least one valid word
+	// it will also match a second word if it comes after the '<' symbol
+	// and finally to make my life easier it matches the opening brace so that I can easily begin the search for the closing brace
+	let definePattern: RegExp = /methodmap\s+(\w+)\s*(<\s*(\w+))?\s*{/g;
+	
+	// let definePattern: RegExp = /methodmap\s+\w+(\s*<\s*\w+)?\s*{/g;
+		
 	// Holds an array of matches from the definePattern above
 	// Due to how it's written it will only ever hold one value
 	let match: RegExpExecArray | null;
-	
+	// math[0]: "methodmap ArrayList < Handle \n{"
+	// math[1]: "ArrayList"
+	// math[2]: "< Handle"
+	// math[3]: "Handle"
 	while ((match = definePattern.exec(text)))
 	{
-		// extract the define name from the full match(0) by removing the keyword and trimming any outer whitespace.
-		// since we're only after the name at this part we don't need to split
-		let methodmapName:string = match[0].replace('methodmap', '').trim();
-
+		let methodmapName:string = match[1];
+		
 		// create a new variable with a classname of itself, since it's its own data type.
 		let newClass: Variable = new Variable(methodmapName, methodmapName, CompletionItemKind.Class);
 
+		// If we found a possible parent class try to inherit it.
+		if(match[3] !== undefined)
+		{
+			let parentClass: Variable | undefined = g_MethodMaps.get(match[3]);
+			if(parentClass !== undefined)
+			{
+				newClass.inherit(parentClass);
+			}
+		}
+
 		// find the location of the name inside the orignal match.
 		// this is for people who like to put their stuff on separate lines
-		let indexof = match[0].indexOf(methodmapName);
+		let indexof = match[0].substr('methodmap'.length).indexOf(methodmapName) + 'methodmap'.length;
 
 		// create a position based of the original match location and and the name postion from within the match
 		let definitionStart: Position = textDocument.positionAt(match.index + indexof);
@@ -72,9 +84,12 @@ export function FindMethodMaps(textDocument: TextDocument): void
 
 		// link it with the Variable object
 		newClass.declarationLocation = defineLocation;
+
+		let closingIndex:number = FindClosingBrace(text, match.index + match[0].length);
+		let closingPosition: Position = textDocument.positionAt(closingIndex);
 		
 		// add it to the list of definitions
-		g_MethodMaps.push(newClass);
+		g_MethodMaps.set(newClass.label, newClass);
 		// TODO: add property, method, and constructor parsing
 	}	
 }
