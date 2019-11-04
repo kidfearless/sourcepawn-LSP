@@ -38,6 +38,7 @@ import * as MethodMaps from "./parser/methodmaps";
 import * as Variables from "./parser/variables";
 import * as Comments from "./parser/comments";
 import * as Strings from "./parser/strings";
+import * as Tokenizer from "./parser/sptokenizer";
 
 import
 {
@@ -112,6 +113,7 @@ documents.onDidChangeContent(function(change: TextDocumentChangeEvent)
  */
 	Defininitions.FindDefines(change.document);
 	MethodMaps.FindMethodMaps(change.document);
+	let tokens = Tokenizer.Tokenize(change.document);
 	Variables.FindVariables(change.document);
 });
 
