@@ -89,7 +89,7 @@
 		}
 	},
 	"indentationRules": {
-		"increaseIndentPattern": "",
-		"decreaseIndentPattern": ""
+		"increaseIndentPattern": ".*{\\s*",
+		"decreaseIndentPattern": ".*}\\s*"
 	}
 }
