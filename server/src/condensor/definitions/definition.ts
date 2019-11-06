@@ -121,76 +121,97 @@ export class SMDefinition
 			});
 		});
 		
-		this.Constants.forEach(var i in this.Constants) 
+		this.Constants.forEach(i =>
 		{
 			this.ConstantsStrings.push(i.Name); 
-		}
-		this.Enums.forEach(var e in this.Enums) 
+		});
+		this.Enums.forEach((e) => 
 		{
-			this.ConstantsStrings.AddRange(e.Entries); 
-		}
-		this.Defines.forEach(var i in this.Defines) 
+			this.ConstantsStrings = this.ConstantsStrings.concat(e.Entries); 
+		});
+		this.Defines.forEach((i) =>
 		{
 			this.ConstantsStrings.push(i.Name); 
-		}
+		});
 
-		this.ConstantsStrings.sort((a, b) => string.Compare(a, b));
-		this.ConstantsStrings = constantNames;
-		List < string > typeNames = new List<string>();
-		typeNames.Capacity = this.Enums.Count + this.Structs.Count + this.Methodmaps.Count;
-		foreach(var i in this.Enums) { typeNames.Add(i.Name); }
-		foreach(var i in this.Structs) { typeNames.Add(i.Name); }
-		foreach(var i in this.Methodmaps) { typeNames.Add(i.Name); }
-		foreach(var i in this.Typedefs) { typeNames.Add(i.Name); }
-		typeNames.Sort((a, b) => string.Compare(a, b));
-		this.TypeStrings = typeNames;
+		this.ConstantsStrings.sort();
+		// this.TypeStrings.Capacity = this.Enums.length + this.Structs.length + this.Methodmaps.length;
+		this.Enums.forEach((i) =>
+		{
+			this.TypeStrings.push(i.Name);
+		});
+		this.Structs.forEach((i) =>
+		{
+			this.TypeStrings.push(i.Name);
+		});
+		this.Methodmaps.forEach((i) =>
+		{
+			this.TypeStrings.push(i.Name);
+		});
+		this.Typedefs.forEach((i) =>
+		{
+			this.TypeStrings.push(i.Name);
+		});
+		this.TypeStrings.sort();
 	}
 
 	ProduceACNodes(): ACNode[]
 	{
-		List < ACNode > nodes = new List<ACNode>();
+		let nodes: ACNode[] = [];
 		try
 		{
-			nodes.Capacity = this.Enums.Count + this.Structs.Count + this.Constants.Count + this.Functions.Count;
-			nodes.AddRange(ACNode.ConvertFromStringArray(this.FunctionStrings, true, "▲ "));
-			nodes.AddRange(ACNode.ConvertFromStringArray(this.TypeStrings, false, "♦ "));
-			nodes.AddRange(ACNode.ConvertFromStringArray(this.ConstantsStrings, false, "• "));
-			nodes.AddRange(ACNode.ConvertFromStringArray(this.MethodmapsStrings, false, "↨ "));
+			// Node.Capacity = this.Enums.Count + this.Structs.Count + this.Constants.Count + this.Functions.Count;
+			nodes = nodes.concat(ACNode.ConvertFromStringArray(this.FunctionStrings, true, "▲ "));
+			nodes = nodes.concat(ACNode.ConvertFromStringArray(this.TypeStrings, false, "♦ "));
+			nodes = nodes.concat(ACNode.ConvertFromStringArray(this.ConstantsStrings, false, "• "));
+			nodes = nodes.concat(ACNode.ConvertFromStringArray(this.MethodmapsStrings, false, "↨ "));
 			//nodes = nodes.Distinct(new ACNodeEqualityComparer()); Methodmaps and Functions can and will be the same.
-			nodes.Sort((a, b) => { return string.Compare(a.EntryName, b.EntryName); });
-		} catch (Exception) { }
+			nodes.sort();
+		}
+		catch (Exception) 
+		{
+
+		}
 		return nodes;
 	}
 	ProduceISNodes(): ISNode[]
 	{
-		List < ISNode > nodes = new List<ISNode>();
+		let nodes: ISNode[] = [];
 		try
 		{
-			nodes.AddRange(ISNode.ConvertFromStringArray(this.MethodsStrings, true, "▲ "));
-			nodes.AddRange(ISNode.ConvertFromStringArray(this.FieldStrings, false, "• "));
-			nodes = nodes.Distinct(new ISNodeEqualityComparer());
-			nodes.Sort((a, b) => { return string.Compare(a.EntryName, b.EntryName); });
+			nodes = nodes.concat(ISNode.ConvertFromStringArray(this.MethodsStrings, true, "▲ "));
+			nodes = nodes.concat(ISNode.ConvertFromStringArray(this.FieldStrings, false, "• "));
+
+
+			nodes = nodes.filter((firstValue:ISNode, firstIndex: number, firstArray:ISNode[]) =>
+			{
+				return firstArray.every((secondValue:ISNode, secondIndex: number, secondArray:ISNode[]) =>
+				{
+					return firstValue.Name !== secondValue.Name;
+				});
+			});
+			nodes.sort();
 		} catch (Exception) { }
 		return nodes;
 	}
 
-	MergeDefinitions(SMDefinition def)
+	MergeDefinitions(def:SMDefinition)
 	{
 		try
 		{
-			this.Functions.AddRange(def.Functions);
-			this.Enums.AddRange(def.Enums);
-			this.Structs.AddRange(def.Structs);
-			this.Defines.AddRange(def.Defines);
-			this.Constants.AddRange(def.Constants);
-			this.Methodmaps.AddRange(def.Methodmaps);
+			this.Functions = this.Functions.concat(def.Functions);
+			this.Enums = this.Enums.concat(def.Enums);
+			this.Structs = this.Structs.concat(def.Structs);
+			this.Defines = this.Defines.concat(def.Defines);
+			this.Constants = this.Constants.concat(def.Constants);
+			this.Methodmaps = this.Methodmaps.concat(def.Methodmaps);
 		}
 		catch (Exception) { }
 	}
 
 	ProduceTemporaryExpandedDefinition(definitions: SMDefinition[]): SMDefinition
 	{
-		SMDefinition def = new SMDefinition();
+		let def:SMDefinition = new SMDefinition();
 		try
 		{
 			def.MergeDefinitions(this);
@@ -210,26 +231,7 @@ export class SMDefinition
 
 class ACNode
 {
-	Name: string;
-	EntryName: string;
-	IsExecuteable: boolean = false;
-
-	constructor(name: string, entryName: string, isExecutable: boolean)
-	{
-		this.Name = name;
-		this.EntryName = entryName;
-		this.IsExecuteable = isExecutable;
-	}
-
-	ToString(): string
-	{
-		return this.Name;
-	}
-}
-
-namespace ACNode
-{
-	function ConvertFromStringArray(strings: string[], Executable: boolean, prefix: string = ''): ACNode[]
+	static ConvertFromStringArray(strings:string[], Executable:boolean, prefix:string = ""): ACNode[]
 	{
 		let nodeList: ACNode[] = [];
 		for (let i: number = 0; i < strings.length; ++i)
@@ -238,10 +240,6 @@ namespace ACNode
 		}
 		return nodeList;
 	}
-}
-
-class ISNode
-{
 	Name: string;
 	EntryName: string;
 	IsExecuteable: boolean = false;
@@ -259,15 +257,30 @@ class ISNode
 	}
 }
 
-namespace ISNode
+class ISNode
 {
-	function ConvertFromStringArray(strings: string[], Executable: boolean, prefix: string = ''): ISNode[]
+	static ConvertFromStringArray(strings: string[], Executable: boolean, prefix: string = ''): ISNode[]
 	{
-		let nodeList: ISNode[] = [];
+		let nodeList: ACNode[] = [];
 		for (let i: number = 0; i < strings.length; ++i)
 		{
-			nodeList.push(new ISNode(prefix + strings[i], strings[i], Executable));
+			nodeList.push(new ACNode(prefix + strings[i], strings[i], Executable));
 		}
 		return nodeList;
+	}
+	Name: string;
+	EntryName: string;
+	IsExecuteable: boolean = false;
+
+	constructor(name: string, entryName: string, isExecutable: boolean)
+	{
+		this.Name = name;
+		this.EntryName = entryName;
+		this.IsExecuteable = isExecutable;
+	}
+
+	ToString(): string
+	{
+		return this.Name;
 	}
 }

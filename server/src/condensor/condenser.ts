@@ -1,3 +1,5 @@
+import { SMDefinition } from './definitions/definition';
+import * as Tokenizer from '../parser/sptokenizer';
 export enum TokenKind
 {
 	Identifier,				//done
@@ -54,15 +56,15 @@ export class Condenser
 	def:SMDefinition;
 	source:string;
 	
-	string FileName = string.Empty;
+	FileName:string = string.Empty;
 
-	constructor(string sourceCode, string fileName)
+	constructor(sourceCode:string, fileName:string)
 	{
-		t = Tokenizer.Tokenizer.TokenizeString(sourceCode, true).ToArray();
-		position = 0;
-		length = t.Length;
-		def = new SMDefinition();
-		source = sourceCode;
+		this.t = Tokenizer.Tokenize.TokenizeString(sourceCode, true).ToArray();
+		this.position = 0;
+		this.length = t.Length;
+		this.def = new SMDefinition();
+		this.source = sourceCode;
 		if (fileName.EndsWith(".inc", StringComparison.InvariantCultureIgnoreCase))
 		{
 			fileName = fileName.Substring(0, fileName.Length - 4);
