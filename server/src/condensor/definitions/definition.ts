@@ -3,7 +3,7 @@ import { SMEnum } from './SMEnum';
 import { SMDefine } from './SMDefine';
 import { SMConstant } from './SMConstant';
 import { SMMethodmap } from './SMMethodmap';
-import { Condenser } from '../condenser';
+// import { Condenser } from '../condenser';
 import { SMStruct } from './SMStruct';
 import { SMTypedef } from './SMTypedef';
 

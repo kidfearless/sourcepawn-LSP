@@ -1,5 +1,5 @@
 import { SMDefinition } from './definitions/definition';
-import * as Tokenizer from '../parser/sptokenizer';
+import * as Tokenizer from './tokenizer/Tokenizer';
 export enum TokenKind
 {
 	Identifier,				//done
@@ -56,33 +56,33 @@ export class Condenser
 	def:SMDefinition;
 	source:string;
 	
-	FileName:string = string.Empty;
+	FileName:string = '';
 
 	constructor(sourceCode:string, fileName:string)
 	{
-		this.t = Tokenizer.Tokenize.TokenizeString(sourceCode, true).ToArray();
+		this.t = Tokenizer.TokenizeString(sourceCode, true);
 		this.position = 0;
-		this.length = t.Length;
+		this.length = this.t.Length;
 		this.def = new SMDefinition();
 		this.source = sourceCode;
-		if (fileName.EndsWith(".inc", StringComparison.InvariantCultureIgnoreCase))
+		if (fileName.endsWith(".inc")
 		{
-			fileName = fileName.Substring(0, fileName.Length - 4);
+			fileName = fileName.substr(0, fileName.length - 4);
 		}
-		FileName = fileName;
+		this.FileName = fileName;
 	}
 
-	export  Condense():SMDefinition
+	Condense():SMDefinition
 	{
-		Token ct = null;
-		while ((ct = t[position]).Kind != TokenKind.EOF)
+		let ct:Token;
+		while ((ct = this.t[this.position]).Kind != TokenKind.EOF)
 		{
 			if (ct.Kind == TokenKind.FunctionIndicator)
 			{
-				number newIndex = ConsumeSMFunction();
+				let newIndex = ConsumeSMFunction();
 				if (newIndex != -1)
 				{
-					position = newIndex + 1;
+					this.position = newIndex + 1;
 					continue;
 				}
 			}
@@ -91,7 +91,7 @@ export class Condenser
 				number newIndex = ConsumeSMEnum();
 				if (newIndex != -1)
 				{
-					position = newIndex + 1;
+					this.position = newIndex + 1;
 					continue;
 				}
 			}
@@ -100,7 +100,7 @@ export class Condenser
 				number newIndex = ConsumeSMStruct();
 				if (newIndex != -1)
 				{
-					position = newIndex + 1;
+					this.position = newIndex + 1;
 					continue;
 				}
 			}
@@ -109,7 +109,7 @@ export class Condenser
 				number newIndex = ConsumeSMPPDirective();
 				if (newIndex != -1)
 				{
-					position = newIndex + 1;
+					this.position = newIndex + 1;
 					continue;
 				}
 			}
@@ -118,7 +118,7 @@ export class Condenser
 				number newIndex = ConsumeSMConstant();
 				if (newIndex != -1)
 				{
-					position = newIndex + 1;
+					this.position = newIndex + 1;
 					continue;
 				}
 			}
@@ -127,7 +127,7 @@ export class Condenser
 				number newIndex = ConsumeSMMethodmap();
 				if (newIndex != -1)
 				{
-					position = newIndex + 1;
+					this.position = newIndex + 1;
 					continue;
 				}
 			}
@@ -136,7 +136,7 @@ export class Condenser
 				number newIndex = ConsumeSMTypeset();
 				if (newIndex != -1)
 				{
-					position = newIndex + 1;
+					this.position = newIndex + 1;
 					continue;
 				}
 			}
@@ -145,22 +145,22 @@ export class Condenser
 				number newIndex = ConsumeSMTypedef();
 				if (newIndex != -1)
 				{
-					position = newIndex + 1;
+					this.position = newIndex + 1;
 					continue;
 				}
 			}
 
-			++position;
+			++this.position;
 		}
-		def.Sort();
-		return def;
+		this.def.Sort();
+		return this.def;
 	}
 
 	BacktraceTestForToken(number StartPosition, TokenKind TestKind, bool IgnoreEOL, bool IgnoreOtherTokens):number
 	{
 		for (number i = StartPosition; i >= 0; --i)
 		{
-			if (t[i].Kind == TestKind)
+			if (this.t[i].Kind == TestKind)
 			{
 				return i;
 			}
@@ -168,7 +168,7 @@ export class Condenser
 			{
 				continue;
 			}
-			else if (t[i].Kind == TokenKind.EOL && IgnoreEOL)
+			else if (this.t[i].Kind == TokenKind.EOL && IgnoreEOL)
 			{
 				continue;
 			}
@@ -180,7 +180,7 @@ export class Condenser
 	{
 		for (number i = StartPosition; i < length; ++i)
 		{
-			if (t[i].Kind == TestKind)
+			if (this.t[i].Kind == TestKind)
 			{
 				return i;
 			}
@@ -188,7 +188,7 @@ export class Condenser
 			{
 				continue;
 			}
-			else if (t[i].Kind == TokenKind.EOL && IgnoreEOL)
+			else if (this.t[i].Kind == TokenKind.EOL && IgnoreEOL)
 			{
 				continue;
 			}
