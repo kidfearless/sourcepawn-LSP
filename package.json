@@ -19,26 +19,26 @@
 	"main": "./client/out/extension",
 	"contributes": {
 		"languages": [
-            {
-                "id": "sourcepawn",
-                "aliases": [
-                    "SourcePawn",
-                    "sourcepawn"
-                ],
-                "extensions": [
-                    ".sp",
-                    ".inc"
-                ],
-                "configuration": "./client/language-configuration.json"
-            }
-        ],
-        "grammars": [
-            {
-                "language": "sourcepawn",
-                "scopeName": "source.sourcepawn",
-                "path": "./client/syntaxes/sourcepawn.tmLanguage.json"
-            }
-        ]
+			{
+				"id": "sourcepawn",
+				"aliases": [
+					"SourcePawn",
+					"sourcepawn"
+				],
+				"extensions": [
+					".sp",
+					".inc"
+				],
+				"configuration": "./client/language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "sourcepawn",
+				"scopeName": "source.sourcepawn",
+				"path": "./client/syntaxes/sourcepawn.tmLanguage.json"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "cd client && npm run update-vscode && cd .. && npm run compile",
