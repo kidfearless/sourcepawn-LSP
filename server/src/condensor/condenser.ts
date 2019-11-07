@@ -62,10 +62,10 @@ export class Condenser
 	{
 		this.t = Tokenizer.TokenizeString(sourceCode, true);
 		this.position = 0;
-		this.length = this.t.Length;
+		this.length = this.t.length;
 		this.def = new SMDefinition();
 		this.source = sourceCode;
-		if (fileName.endsWith(".inc")
+		if (fileName.endsWith(".inc"))
 		{
 			fileName = fileName.substr(0, fileName.length - 4);
 		}
