@@ -7,6 +7,43 @@ import
 
 // NOTE: the properties and methods are maps so that we can easily inherit properties and methods
 // 		 as well as filter out any duplicates that may pop up while we are parsing.
+
+export class StringBuilder
+{
+	/* Insert(index: number, input:string):string
+	{
+		if(index >= this.buffer.length)
+		{
+			index = this.buffer.length - 1;
+		}
+		this.buffer = this.buffer.slice(0, index) + input + this.buffer.substr(index+1);
+		return this.buffer;
+	} */
+	Insert(input:string):string
+	{
+		this.buffer = input + this.buffer;
+		return this.buffer;
+	}
+	buffer:string = "";
+	constructor(inputString:string = "")
+	{
+		this.buffer = inputString;
+	}
+	Append(input:string):string
+	{
+		this.buffer = this.buffer + input;
+		return this.buffer;
+	}
+	AppendLine(input:string = ''):string
+	{
+		this.buffer = this.buffer + input + '\n';
+		return this.buffer;
+	}
+	ToString():string
+	{
+		return this.buffer;
+	}
+}
 export class Variable
 {
 	// either the name of the methodmap or the name of the variable

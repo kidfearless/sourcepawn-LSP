@@ -52,3 +52,30 @@ export function FindClosingBrace(source: string, startPoint:number): number
 	}
 	return endPoint;
 }
+
+export function IsStringNullOrWhitespace(source:string|null):boolean
+{
+	return !(source !== null && source.length > 0 && source[0].match(/\s/) !== null);
+}
+
+export function TrimStart(source: string, characters:string[]):string
+{
+	let ret = source.slice(0);
+
+	let test = false;
+	do
+	{
+		test = false;
+		for(let i = 0; i < characters.length; ++i)
+		{
+			if(ret[0] === characters[i][0])
+			{
+				ret = ret.slice(1);
+				test = true;
+			}
+		}
+	} while(test);
+
+
+	return ret;
+}
