@@ -54,6 +54,7 @@
 		"typescript": "^3.5.1"
 	},
 	"dependencies": {
+		"fs": "0.0.1-security",
 		"vscode-languageserver": "^5.2.1",
 		"vscode-uri": "^2.1.1"
 	}

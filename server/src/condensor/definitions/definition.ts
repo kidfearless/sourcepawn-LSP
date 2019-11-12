@@ -6,7 +6,10 @@ import { SMMethodmap } from './SMMethodmap';
 // import { Condenser } from '../condenser';
 import { SMStruct } from './SMStruct';
 import { SMTypedef } from './SMTypedef';
-
+import * as fs from 'fs';
+import { Directory } from '../../classes';
+import { Condenser } from '../condenser';
+import { parse } from 'path';
 
 export class SMDefinition
 {
@@ -75,31 +78,42 @@ export class SMDefinition
 		catch (Exception) { } //racing condition on save when the thread closes first or not..
 	}
 
-	/* AppendFiles(paths: string[])
+	AppendFiles(paths: string[])
 	{
-		for (let i = 0; i < paths.Length; ++i)
+		for (let i = 0; i < paths.length; ++i)
 		{
-			if (Directory.Exists(paths[i]))
+			if (!Directory.Exists(paths[i]))
 			{
-				string[] files = Directory.GetFiles(paths[i], "*.inc", SearchOption.AllDirectories);
-				for (let j = 0; j < files.Length; ++j)
-				{
-					FileInfo fInfo = new FileInfo(files[j]);
-					Condenser subCondenser = new Condenser(File.ReadAllText(fInfo.FullName), fInfo.Name);
-					var subDefinition = subCondenser.Condense();
-					Functions.AddRange(subDefinition.Functions);
-					Enums.AddRange(subDefinition.Enums);
-					Structs.AddRange(subDefinition.Structs);
-					Defines.AddRange(subDefinition.Defines);
-					Constants.AddRange(subDefinition.Constants);
-					Methodmaps.AddRange(subDefinition.Methodmaps);
-					Typedefs.AddRange(subDefinition.Typedefs);
-				}
+				continue;
 			}
+			let files:string[]|false = Directory.GetFiles(paths[i], /\*.inc/);
+			if(!files)
+			{
+				continue;
+			}
+
+			for (let j = 0; j < files.length; ++j)
+			{
+				let text:string|false =  Directory.ReadAllText(files[j]);
+				if(!text)
+				{
+					continue;
+				}
+				let subCondenser:Condenser = new Condenser(text, parse(files[j]).base);
+				var subDefinition = subCondenser.Condense();
+				this.Functions = this.Functions.concat(subDefinition.Functions);
+				this.Enums = this.Enums.concat(subDefinition.Enums);
+				this.Structs = this.Structs.concat(subDefinition.Structs);
+				this.Defines = this.Defines.concat(subDefinition.Defines);
+				this.Constants = this.Constants.concat(subDefinition.Constants);
+				this.Methodmaps = this.Methodmaps.concat(subDefinition.Methodmaps);
+				this.Typedefs = this.Typedefs.concat(subDefinition.Typedefs);
+			}
+			
 		}
 		this.Sort();
 		this.ProduceStringArrays();
-	} */
+	}
 
 	ProduceStringArrays()
 	{

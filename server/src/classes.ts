@@ -4,7 +4,7 @@ import
 	CompletionItemKind,
 	DefinitionLink
 } from 'vscode-languageserver';
-
+import * as fs from 'fs';
 // NOTE: the properties and methods are maps so that we can easily inherit properties and methods
 // 		 as well as filter out any duplicates that may pop up while we are parsing.
 
@@ -44,6 +44,7 @@ export class StringBuilder
 		return this.buffer;
 	}
 }
+
 export class Variable
 {
 	// either the name of the methodmap or the name of the variable
@@ -104,6 +105,71 @@ export class Variable
 			returnValue = returnValue.concat(Array.from(this.methods.values()));
 		}
 
+		return returnValue;
+	}
+}
+
+export class Directory
+{
+	static Exists(path:string):boolean
+	{
+		let returnValue:boolean = false;
+		fs.stat(path, function(exists:NodeJS.ErrnoException)
+		{
+			if (exists == null)
+			{
+				returnValue = true;
+			}
+		});
+		return returnValue;
+	}
+
+	static IsDirectory(path:string):boolean
+	{
+		let returnValue:boolean = false;
+		fs.stat(path, function(exists:NodeJS.ErrnoException, stats: fs.Stats)
+		{
+			returnValue = stats.isDirectory();
+		});
+		return returnValue;
+	}
+
+	static GetFiles(path:string, regex?:RegExp): string[]|false
+	{
+		let returnValue:false|string[] = false;
+		fs.readdir(path, function (err:NodeJS.ErrnoException, files:string[])
+		{
+			if (err)
+			{
+				return;
+			}
+			if(regex !== undefined)
+			{
+				returnValue = files.filter(function(value:string)
+				{
+					return value.match(regex) !== null;
+				});
+			}
+			else
+			{
+				returnValue = files;
+			}
+
+		});
+		return returnValue;
+	}
+
+	static ReadAllText(file:string):string|false
+	{
+		let returnValue:false|string = false;
+		fs.readFile(file, "utf-8", function(err:NodeJS.ErrnoException, files:string)
+		{
+			if(err)
+			{
+				return;
+			}
+			returnValue = files;
+		});
 		return returnValue;
 	}
 }
