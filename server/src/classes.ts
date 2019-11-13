@@ -113,63 +113,32 @@ export class Directory
 {
 	static Exists(path:string):boolean
 	{
-		let returnValue:boolean = false;
-		fs.stat(path, function(exists:NodeJS.ErrnoException)
-		{
-			if (exists == null)
-			{
-				returnValue = true;
-			}
-		});
-		return returnValue;
+		return !!fs.statSync(path);
 	}
 
 	static IsDirectory(path:string):boolean
 	{
-		let returnValue:boolean = false;
-		fs.stat(path, function(exists:NodeJS.ErrnoException, stats: fs.Stats)
+		return fs.statSync(path).isDirectory();
+	}
+
+	static GetFiles(path:string, regex?:RegExp): string[]
+	{
+		let returnValue:string[];
+		returnValue = fs.readdirSync(path);
+
+		if(regex !== undefined)
 		{
-			returnValue = stats.isDirectory();
-		});
+			returnValue = returnValue.filter(function(value:string)
+			{
+				return value.match(regex) !== null;
+			});
+		}
+
 		return returnValue;
 	}
 
-	static GetFiles(path:string, regex?:RegExp): string[]|false
+	static ReadAllText(file:string):string
 	{
-		let returnValue:false|string[] = false;
-		fs.readdir(path, function (err:NodeJS.ErrnoException, files:string[])
-		{
-			if (err)
-			{
-				return;
-			}
-			if(regex !== undefined)
-			{
-				returnValue = files.filter(function(value:string)
-				{
-					return value.match(regex) !== null;
-				});
-			}
-			else
-			{
-				returnValue = files;
-			}
-
-		});
-		return returnValue;
-	}
-
-	static ReadAllText(file:string):string|false
-	{
-		let returnValue:false|string = false;
-		fs.readFile(file, "utf-8", function(err:NodeJS.ErrnoException, files:string)
-		{
-			if(err)
-			{
-				return;
-			}
-			returnValue = files;
-		});
-		return returnValue;
+		return fs.readFileSync(file, "utf-8");
 	}
 }

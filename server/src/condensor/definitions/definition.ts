@@ -9,7 +9,7 @@ import { SMTypedef } from './SMTypedef';
 import * as fs from 'fs';
 import { Directory } from '../../classes';
 import { Condenser } from '../condenser';
-import { parse } from 'path';
+import { parse, join } from 'path';
 
 export class SMDefinition
 {
@@ -86,7 +86,7 @@ export class SMDefinition
 			{
 				continue;
 			}
-			let files:string[]|false = Directory.GetFiles(paths[i], /\*.inc/);
+			let files:string[] = Directory.GetFiles(paths[i], /.*.inc/);
 			if(!files)
 			{
 				continue;
@@ -94,12 +94,13 @@ export class SMDefinition
 
 			for (let j = 0; j < files.length; ++j)
 			{
-				let text:string|false =  Directory.ReadAllText(files[j]);
+				let file = join("include", files[j]);
+				let text:string = Directory.ReadAllText(file);
 				if(!text)
 				{
 					continue;
 				}
-				let subCondenser:Condenser = new Condenser(text, parse(files[j]).base);
+				let subCondenser:Condenser = new Condenser(text, parse(file).base);
 				var subDefinition = subCondenser.Condense();
 				this.Functions = this.Functions.concat(subDefinition.Functions);
 				this.Enums = this.Enums.concat(subDefinition.Enums);
