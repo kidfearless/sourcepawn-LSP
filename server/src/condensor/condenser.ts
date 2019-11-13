@@ -56,7 +56,7 @@ export class Condenser
 {
 	t:Token[];
 	position:number;
-	length:number;
+	Length:number;
 	def:SMDefinition;
 	source:string;
 	
@@ -66,7 +66,7 @@ export class Condenser
 	{
 		this.t = Tokenizer.TokenizeString(sourceCode, true);
 		this.position = 0;
-		this.length = this.t.length;
+		this.Length = this.t.length;
 		this.def = new SMDefinition();
 		this.source = sourceCode;
 		if (fileName.endsWith(".inc"))
@@ -182,7 +182,7 @@ export class Condenser
 	}
 	FortraceTestForToken( StartPosition: number, TestKind:TokenKind, IgnoreEOL:boolean, IgnoreOtherTokens: boolean):number
 	{
-		for (let i = StartPosition; i < length; ++i)
+		for (let i = StartPosition; i < this.Length; ++i)
 		{
 			if (this.t[i].Kind == TestKind)
 			{
@@ -264,14 +264,14 @@ export class Condenser
 	ConsumeSMTypedef():number
 	{
 		let startIndex:number = this.t[this.position].Index;
-		if ((this.position + 2) < length)
+		if ((this.position + 2) < this.Length)
 		{
 			++this.position;
 			let name:string = "";
 			if (this.t[this.position].Kind == TokenKind.Identifier)
 			{
 				name = this.t[this.position].Value;
-				for (let iteratePosition = this.position + 1; iteratePosition < length; ++iteratePosition)
+				for (let iteratePosition = this.position + 1; iteratePosition < this.Length; ++iteratePosition)
 				{
 					if (this.t[iteratePosition].Kind == TokenKind.Semicolon)
 					{
@@ -295,7 +295,7 @@ export class Condenser
 	ConsumeSMTypeset(): number
 	{
 		let startIndex:number = this.t[this.position].Index;
-		if ((this.position + 2) < length)
+		if ((this.position + 2) < this.Length)
 		{
 			++this.position;
 			let name:string = "";
@@ -303,7 +303,7 @@ export class Condenser
 			{
 				name = this.t[this.position].Value;
 				let bracketIndex = 0;
-				for (let iteratePosition = this.position + 1; iteratePosition < length; ++iteratePosition)
+				for (let iteratePosition = this.position + 1; iteratePosition < this.Length; ++iteratePosition)
 				{
 					if (this.t[iteratePosition].Kind == TokenKind.BraceClose)
 					{
@@ -337,11 +337,11 @@ export class Condenser
 	ConsumeSMStruct():number
 	{
 		let startIndex:number = this.t[this.position].Index;
-		if ((this.position + 1) < length)
+		if ((this.position + 1) < this.Length)
 		{
 			let iteratePosition = this.position;
 			let structName:string = "";
-			while ((iteratePosition + 1) < length && this.t[iteratePosition].Kind != TokenKind.BraceOpen)
+			while ((iteratePosition + 1) < this.Length && this.t[iteratePosition].Kind != TokenKind.BraceOpen)
 			{
 				if (this.t[iteratePosition].Kind == TokenKind.Identifier)
 				{
@@ -351,7 +351,7 @@ export class Condenser
 			}
 			let braceState = 0;
 			let endTokenIndex = -1;
-			for (; iteratePosition < length; ++iteratePosition)
+			for (; iteratePosition < this.Length; ++iteratePosition)
 			{
 				if (this.t[iteratePosition].Kind == TokenKind.BraceOpen)
 				{
@@ -390,7 +390,7 @@ export class Condenser
 	{
 		if (this.t[this.position].Value == "#define")
 		{
-			if ((this.position + 1) < length)
+			if ((this.position + 1) < this.Length)
 			{
 				if (this.t[this.position + 1].Kind == TokenKind.Identifier)
 				{
@@ -402,7 +402,7 @@ export class Condenser
 							Name: this.t[this.position + 1].Value
 						}
 					);
-					for (let j = this.position + 1; j < length; ++j)
+					for (let j = this.position + 1; j < this.Length; ++j)
 					{
 						if (this.t[j].Kind == TokenKind.EOL)
 						{
@@ -422,7 +422,7 @@ export class Condenser
 	{
 		let startIndex:number = this.t[this.position].Index;
 		let iteratePosition = this.position + 1;
-		if ((this.position + 4) < length)
+		if ((this.position + 4) < this.Length)
 		{
 			let methodMapName:string = "";
 			let methodMapType:string = "";
@@ -446,7 +446,7 @@ export class Condenser
 			let enteredBlock:boolean = false;
 			let braceIndex = 0;
 			let lastIndex = -1;
-			for (; iteratePosition < length; ++iteratePosition)
+			for (; iteratePosition < this.Length; ++iteratePosition)
 			{
 				if (this.t[iteratePosition].Kind == TokenKind.BraceOpen)
 				{
@@ -467,7 +467,7 @@ export class Condenser
 				{
 					if (this.t[iteratePosition].Value == "<")
 					{
-						if ((iteratePosition + 1) < length)
+						if ((iteratePosition + 1) < this.Length)
 						{
 							if (this.t[iteratePosition + 1].Kind == TokenKind.Identifier)
 							{
@@ -516,7 +516,7 @@ export class Condenser
 						let lastFoundParam:string = "";
 						let foundCurentParameter:boolean = false;
 						let InSearchForComma:boolean = false;
-						for (let i = iteratePosition; i < length; ++i)
+						for (let i = iteratePosition; i < this.Length; ++i)
 						{
 							if (InCodeSection)
 							{
@@ -550,7 +550,7 @@ export class Condenser
 								}
 								if (this.t[i].Kind == TokenKind.Identifier && AwaitingName)
 								{
-									if ((i + 1) < length)
+									if ((i + 1) < this.Length)
 									{
 										if (this.t[i + 1].Kind == TokenKind.Identifier)
 										{
@@ -582,7 +582,7 @@ export class Condenser
 											lastFoundParam = "";
 										}
 										InCodeSection = true;
-										if ((i + 1) < length)
+										if ((i + 1) < this.Length)
 										{
 											if (this.t[i + 1].Kind == TokenKind.Semicolon)
 											{
@@ -646,7 +646,7 @@ export class Condenser
 						let fieldName:string = "";
 						let InPureSemicolonSearch:boolean = false;
 						let fBracketIndex = 0;
-						for (let j = iteratePosition; j < length; ++j)
+						for (let j = iteratePosition; j < this.Length; ++j)
 						{
 							if (this.t[j].Kind == TokenKind.Identifier && !InPureSemicolonSearch)
 							{
@@ -681,7 +681,7 @@ export class Condenser
 								--fBracketIndex;
 								if (fBracketIndex == 0)
 								{
-									if ((j + 1) < length)
+									if ((j + 1) < this.Length)
 									{
 										if (this.t[j + 1].Kind == TokenKind.Semicolon)
 										{
@@ -742,7 +742,7 @@ export class Condenser
 		{
 			case "stock":
 			{
-				if ((startPosition + 1) < length)
+				if ((startPosition + 1) < this.Length)
 				{
 					if (this.t[startPosition + 1].Kind == TokenKind.FunctionIndicator)
 					{
@@ -769,7 +769,7 @@ export class Condenser
 			}
 			case "public":
 			{
-				if ((startPosition + 1) < length)
+				if ((startPosition + 1) < this.Length)
 				{
 					if (this.t[startPosition + 1].Kind == TokenKind.FunctionIndicator)
 					{
@@ -865,7 +865,7 @@ export class Condenser
 		let gotCommaBreak:boolean = false;
 		let outTokenIndex = -1;
 		let braceState = 0;
-		for (; iteratePosition < length; ++iteratePosition)
+		for (; iteratePosition < this.Length; ++iteratePosition)
 		{
 			if (this.t[iteratePosition].Kind == TokenKind.ParenthesisOpen)
 			{
@@ -879,21 +879,21 @@ export class Condenser
 				{
 					outTokenIndex = iteratePosition;
 					parameterDeclIndexEnd = this.t[iteratePosition].Index;
-					let length = (this.t[iteratePosition].Index - 1) - (lastParameterIndex + 1);
+					let len = (this.t[iteratePosition].Index - 1) - (lastParameterIndex + 1);
 					if (gotCommaBreak)
 					{
-						if (length == 0)
+						if (len == 0)
 						{
 							functionParameters.push("");
 						}
 						else
 						{
-							functionParameters.push((this.source.substring(lastParameterIndex + 1, length + 1)).trim());
+							functionParameters.push((this.source.substring(lastParameterIndex + 1, len + 1)).trim());
 						}
 					}
-					else if (length > 0)
+					else if (len > 0)
 					{
-						let singleParameterString:string = this.source.substring(lastParameterIndex + 1, length + 1);
+						let singleParameterString:string = this.source.substring(lastParameterIndex + 1, len + 1);
 						if (!IsStringNullOrWhitespace(singleParameterString))
 						{
 							functionParameters.push(singleParameterString);
@@ -914,14 +914,14 @@ export class Condenser
 			if (this.t[iteratePosition].Kind == TokenKind.Comma && braceState == 0)
 			{
 				gotCommaBreak = true;
-				let length = (this.t[iteratePosition].Index - 1) - (lastParameterIndex + 1);
-				if (length == 0)
+				let len = (this.t[iteratePosition].Index - 1) - (lastParameterIndex + 1);
+				if (len == 0)
 				{
 					functionParameters.push("");
 				}
 				else
 				{
-					functionParameters.push((this.source.substring(lastParameterIndex + 1, length + 1)).trim());
+					functionParameters.push((this.source.substring(lastParameterIndex + 1, len + 1)).trim());
 				}
 				lastParameterIndex = this.t[iteratePosition].Index;
 			}
@@ -943,7 +943,7 @@ export class Condenser
 				Parameters: Array.from(functionParameters)
 			}
 		);
-		if ((outTokenIndex + 1) < length)
+		if ((outTokenIndex + 1) < this.Length)
 		{
 			if (this.t[outTokenIndex + 1].Kind == TokenKind.Semicolon)
 			{
@@ -953,7 +953,7 @@ export class Condenser
 			if (nextOpenBraceTokenIndex != -1)
 			{
 				braceState = 0;
-				for (let i = nextOpenBraceTokenIndex; i < length; ++i)
+				for (let i = nextOpenBraceTokenIndex; i < this.Length; ++i)
 				{
 					if (this.t[i].Kind == TokenKind.BraceOpen)
 					{
@@ -977,11 +977,11 @@ export class Condenser
 	ConsumeSMEnum():number
 	{
 		let startIndex:number = this.t[this.position].Index;
-		if ((this.position + 1) < length)
+		if ((this.position + 1) < this.Length)
 		{
 			let iteratePosition = this.position;
 			let enumName:string = "";
-			while ((iteratePosition + 1) < length && this.t[iteratePosition].Kind != TokenKind.BraceOpen)
+			while ((iteratePosition + 1) < this.Length && this.t[iteratePosition].Kind != TokenKind.BraceOpen)
 			{
 				if (this.t[iteratePosition].Kind == TokenKind.Identifier)
 				{
@@ -993,7 +993,7 @@ export class Condenser
 			let inIgnoreMode:boolean = false;
 			let endTokenIndex = -1;
 			let entries:string[] = [];
-			for (; iteratePosition < length; ++iteratePosition)
+			for (; iteratePosition < this.Length; ++iteratePosition)
 			{
 				if (this.t[iteratePosition].Kind == TokenKind.BraceOpen)
 				{
@@ -1045,13 +1045,13 @@ export class Condenser
 	// #region SMConstantConsumer
 	ConsumeSMConstant():number
 	{
-		if ((this.position + 2) < length)
+		if ((this.position + 2) < this.Length)
 		{
 			let startIndex:number = this.t[this.position].Index;
 			let foundIdentifier:boolean = false;
 			let foundAssignment:boolean = false;
 			let constantName:string = "";
-			for (let i = this.position + 2; i < length; ++i)
+			for (let i = this.position + 2; i < this.Length; ++i)
 			{
 				if (this.t[i].Kind == TokenKind.Semicolon)
 				{

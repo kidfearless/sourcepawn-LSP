@@ -39,6 +39,7 @@ import * as Variables from "./parser/variables";
 import * as Comments from "./parser/comments";
 import * as Strings from "./parser/strings";
 import * as Tokenizer from "./parser/sptokenizer";
+import * as fs from 'fs';
 
 import
 {
@@ -46,6 +47,8 @@ import
 	IsStringTrigger,
 	IsDotTrigger
 } from './utils';
+import { SMDefinition } from './condensor/definitions/definition';
+import { parse, join } from 'path';
 
 // Creates a new connection to the client for all current and proposed features.
 // We won't use them all but it makes it easier
@@ -89,6 +92,13 @@ function OnInitialize(params: InitializeParams): InitializeResult
 
 connection.onInitialize(OnInitialize);
 
+documents.onDidSave(function(change: TextDocumentChangeEvent)
+{
+	let def = new SMDefinition();
+	let path = './include/';
+	def.AppendFiles([path]);
+	console.log("saved");
+});
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
