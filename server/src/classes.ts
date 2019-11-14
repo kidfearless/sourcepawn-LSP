@@ -5,6 +5,7 @@ import
 	DefinitionLink
 } from 'vscode-languageserver';
 import * as fs from 'fs';
+import * as path from 'path';
 // NOTE: the properties and methods are maps so that we can easily inherit properties and methods
 // 		 as well as filter out any duplicates that may pop up while we are parsing.
 

@@ -9,7 +9,8 @@ import { SMTypedef } from './SMTypedef';
 import * as fs from 'fs';
 import { Directory } from '../../classes';
 import { Condenser } from '../condenser';
-import { parse, join } from 'path';
+import { parse, join, relative } from 'path';
+import * as glob from 'glob';
 
 export class SMDefinition
 {
@@ -78,23 +79,13 @@ export class SMDefinition
 		catch (Exception) { } //racing condition on save when the thread closes first or not..
 	}
 
-	AppendFiles(paths: string[])
+	AppendFiles(paths: string, onFinished: (() => void))
 	{
-		for (let i = 0; i < paths.length; ++i)
-		{
-			if (!Directory.Exists(paths[i]))
-			{
-				continue;
-			}
-			let files:string[] = Directory.GetFiles(paths[i], /.*.inc/);
-			if(!files)
-			{
-				continue;
-			}
-
+		glob(join(paths, '**/*.inc'), (err: Error | null, files: string[]) =>
+		{	
 			for (let j = 0; j < files.length; ++j)
 			{
-				let file = join("include", files[j]);
+				let file = files[j];
 				let text:string = Directory.ReadAllText(file);
 				if(!text)
 				{
@@ -110,10 +101,10 @@ export class SMDefinition
 				this.Methodmaps = this.Methodmaps.concat(subDefinition.Methodmaps);
 				this.Typedefs = this.Typedefs.concat(subDefinition.Typedefs);
 			}
-			
-		}
-		this.Sort();
-		this.ProduceStringArrays();
+			this.Sort();
+			this.ProduceStringArrays();
+			onFinished();
+		});
 	}
 
 	ProduceStringArrays()
