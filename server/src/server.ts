@@ -110,8 +110,37 @@ documents.onDidOpen(function(change: TextDocumentChangeEvent)
 	let root:string = cwd();
 	definitions = new SMDefinition();
 	definitions.AppendFiles(root);
+function GetIncludes(change: TextDocumentChangeEvent)
+{
+	let text:string = change.document.getText();
 });
 
+	let includeRegex:RegExp = /#include\s*<([\w\/]+)>/gm;
+	let relativeRegex:RegExp = /#include\s*\"([\w\/\.]+)\"/gm;
+
+	let match: RegExpExecArray | null;
+	let matches:string[] = [];
+	while ((match = includeRegex.exec(text)))
+	{
+		matches.push(match[1] + '.inc');
+	}
+	match = null;
+	while ((match = relativeRegex.exec(text)))
+	{
+		matches.push(match[1]);
+	}
+
+	for(let i = 0 ; i < matches.length; ++i)
+	{
+		glob(join(cwd(), '**/*' + matches[i]), (err: Error | null, files: string[]) =>
+		{
+			let file = documents.get('file://' + (files[0]));
+			console.log(files);
+		});
+	}
+
+	console.log(matches);
+}
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
