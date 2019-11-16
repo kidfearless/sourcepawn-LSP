@@ -79,7 +79,7 @@ export class SMDefinition
 		catch (Exception) { } //racing condition on save when the thread closes first or not..
 	}
 
-	AppendFiles(paths: string, onFinished: (() => void))
+	AppendFiles(paths: string, onFinished?: (() => void))
 	{
 		glob(join(paths, '**/*.inc'), (err: Error | null, files: string[]) =>
 		{	
@@ -103,7 +103,10 @@ export class SMDefinition
 			}
 			this.Sort();
 			this.ProduceStringArrays();
-			onFinished();
+			if(onFinished)
+			{
+				onFinished();
+			}
 		});
 	}
 
@@ -171,6 +174,12 @@ export class SMDefinition
 			nodes = nodes.concat(ACNode.ConvertFromStringArray(this.TypeStrings, false, "♦ "));
 			nodes = nodes.concat(ACNode.ConvertFromStringArray(this.ConstantsStrings, false, "• "));
 			nodes = nodes.concat(ACNode.ConvertFromStringArray(this.MethodmapsStrings, false, "↨ "));
+			
+			nodes = nodes.filter(function(value: ACNode, index: number, self: ACNode[])
+			{
+				return self.indexOf(value) === index;
+			});
+
 			//nodes = nodes.Distinct(new ACNodeEqualityComparer()); Methodmaps and Functions can and will be the same.
 			nodes.sort();
 		}
@@ -235,7 +244,7 @@ export class SMDefinition
 	}
 }
 
-class ACNode
+export class ACNode
 {
 	static ConvertFromStringArray(strings:string[], Executable:boolean, prefix:string = ""): ACNode[]
 	{

@@ -49,7 +49,7 @@ import
 	IsStringTrigger,
 	IsDotTrigger
 } from './utils';
-import { SMDefinition } from './condensor/definitions/definition';
+import { SMDefinition, ACNode } from './condensor/definitions/definition';
 import { parse, join } from 'path';
 import { cwd } from 'process';
 
@@ -67,6 +67,8 @@ documents.listen(connection);
 // Listen on the connection
 connection.listen();
 
+var definitions = new SMDefinition();
+
 function OnInitialize(params: InitializeParams): InitializeResult
 {
 	let ret:InitializeResult = 
@@ -79,7 +81,7 @@ function OnInitialize(params: InitializeParams): InitializeResult
 			// Tell the client that the server supports code completion
 			completionProvider:
 			{
-				resolveProvider: true,
+				resolveProvider: false,
 				triggerCharacters: ['.']
 			}
 			// We aren't there yet
@@ -95,18 +97,20 @@ function OnInitialize(params: InitializeParams): InitializeResult
 
 connection.onInitialize(OnInitialize);
 
-var def = new SMDefinition();
 documents.onDidSave(function(change: TextDocumentChangeEvent)
 {
 	let root:string = cwd();
-	let finished = function()
-	{
-		console.log(def.Methodmaps);
-	};
-	def.AppendFiles(root, finished);
+	definitions = new SMDefinition();
+	definitions.AppendFiles(root);
 
 });
 
+documents.onDidOpen(function(change: TextDocumentChangeEvent)
+{
+	let root:string = cwd();
+	definitions = new SMDefinition();
+	definitions.AppendFiles(root);
+});
 
 
 // The content of a text document has changed. This event is emitted
@@ -115,21 +119,7 @@ documents.onDidChangeContent(function(change: TextDocumentChangeEvent)
 {
 	Strings.FindStrings(change.document);
 	Comments.FindComments(change.document);
-	/* Strings.g_StringLocations.forEach(
-		function(location: LocationLink)
-		{
-			connection.console.log('string found at');
-			connection.console.log(LinkLocationToString(location));
-		}
-	);
-	Comments.g_CommentLocations.forEach(
-		function(loc: LocationLink)
-		{
-			connection.client.connection.console.log('comment found at');
-			connection.console.log(LinkLocationToString(loc));
-		}
-	);
- */
+
 	Defininitions.FindDefines(change.document);
 	MethodMaps.FindMethodMaps(change.document);
 	let tokens = Tokenizer.Tokenize(change.document);
@@ -139,7 +129,6 @@ documents.onDidChangeContent(function(change: TextDocumentChangeEvent)
 connection.onDidChangeWatchedFiles(function(_change)
 {
 	// Monitored files have change in VSCode
-	connection.console.log('We received an onDidChangeWatchedFiles');
 });
 
 // This handler provides the initial list of the completion items.
@@ -149,59 +138,39 @@ connection.onCompletion(
 		let defines = Defininitions.GetDefines();
 		let methodmaps = MethodMaps.GetMethodMaps();
 		let variables = Variables.GetVariables();
-		let myClass: CompletionItem = CompletionItem.create('MyClass');
-		myClass.kind = CompletionItemKind.Class;
 
 		let doc: TextDocument|undefined = documents.get(textDocumentPosition.textDocument.uri);
 		if(doc !== undefined)
 		{
 			let lineItem:string = doc.getText(Range.create(textDocumentPosition.position.line, 0, textDocumentPosition.position.line, textDocumentPosition.position.character));
-			//if(IsStringTrigger('MyClass', lineItem, textDocumentPosition.position.character)/*  && IsDotTrigger(lineItem, textDocumentPosition.position.character) !== false */)
+			if(IsDotTrigger(lineItem, textDocumentPosition.position.character) !== false)
 			{
-				let lengthCompletion: CompletionItem = CompletionItem.create('Length');
-				lengthCompletion.kind = CompletionItemKind.Property;
-				methodmaps = methodmaps.concat(lengthCompletion);
+				let allMethods: CompletionItem[] = [];
+				definitions.MethodsStrings.forEach((value:string) =>
+				{
+					allMethods.push(CompletionItem.create(value));
+				});
+				definitions.FieldStrings.forEach((value:string) =>
+				{
+					allMethods.push(CompletionItem.create(value));
+				});
+				return allMethods;
 			}
-
 		}
-		else
-		{
-			connection.console.log('undefined document');
-		}
-		
-		//completion.filterText = completion.insertText = 'MyClass.Length';
-		//completion.kind = CompletionItemKind.Property;
-		// completion.commitCharacters = ['.'];
-		return defines.concat(methodmaps).concat(variables).concat(myClass);
 
+	
+		return defines.concat(methodmaps).concat(variables);
 	}
 );
 
-
-/* async function onDefinition(documentParams: TextDocumentPositionParams): Promise<Definition | DefinitionLink[] | undefined>
-{
-	let currentDoc: TextDocument | undefined = documents.get(documentParams.textDocument.uri);
-	if(!currentDoc)
-	{
-		return undefined;
-	}
-	let endLineLength = currentDoc.getText().split('\n')[documentParams.position.line].length;
-	// 
-	let range = Range.create(documentParams.position, Position.create(documentParams.position.line, endLineLength));
-
-	connection.client.connection.console.error(currentDoc.getText(range));
-	return undefined;
-}
-
-connection.onDefinition(onDefinition); */
+/* 
 
 // This handler resolves additional information for the item selected in
 // the completion list.
 connection.onCompletionResolve(
 	function(item: CompletionItem): CompletionItem
 	{
-		connection.console.log('received onCompletionResolve event');
 		return item;
 	}
-);
+); */
 
