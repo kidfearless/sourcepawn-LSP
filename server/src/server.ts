@@ -77,7 +77,7 @@ function OnInitialize(params: InitializeParams): InitializeResult
 		{
 			// since TextDocuments only supports full document sync this just returns full.
 			textDocumentSync: documents.syncKind,
-			definitionProvider: true,
+			definitionProvider: false,
 			// Tell the client that the server supports code completion
 			completionProvider:
 			{
