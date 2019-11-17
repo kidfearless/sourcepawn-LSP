@@ -1,9 +1,9 @@
 {
 	"name": "sourcepawn-lsp",
-	"description": "A language server example",
+	"description": "A basic sourcepawn language server",
 	"author": "KiD Fearless",
 	"license": "MIT",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/Microsoft/vscode-extension-samples"

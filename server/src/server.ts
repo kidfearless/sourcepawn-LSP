@@ -110,6 +110,7 @@ documents.onDidOpen(function(change: TextDocumentChangeEvent)
 	let root:string = cwd();
 	definitions = new SMDefinition();
 	definitions.AppendFiles(root);
+
 });
 
 // The content of a text document has changed. This event is emitted
@@ -122,7 +123,13 @@ documents.onDidChangeContent(function(change: TextDocumentChangeEvent)
 	Defininitions.FindDefines(change.document);
 	MethodMaps.FindMethodMaps(change.document);
 	let tokens = Tokenizer.Tokenize(change.document);
-	Variables.FindVariables(change.document);
+
+	let types:string[] = definitions.TypeStrings.filter((value:string, index:number, self: string[]) =>
+	{
+		return self.indexOf(value) === index;
+	});
+
+	Variables.FindVariables(change.document, types);
 });
 
 connection.onDidChangeWatchedFiles(function(_change)
@@ -142,22 +149,44 @@ connection.onCompletion(
 		if(doc !== undefined)
 		{
 			let lineItem:string = doc.getText(Range.create(textDocumentPosition.position.line, 0, textDocumentPosition.position.line, textDocumentPosition.position.character));
-			if(IsDotTrigger(lineItem, textDocumentPosition.position.character) !== false)
+			if(IsDotTrigger(lineItem, textDocumentPosition.position.character))
 			{
 				let allMethods: CompletionItem[] = [];
-				definitions.MethodsStrings.forEach((value:string) =>
+				definitions.MethodsStrings.forEach((value:string) =>                                                                                        
 				{
-					allMethods.push(CompletionItem.create(value));
+					let item: CompletionItem = CompletionItem.create(value);
+					item.kind = CompletionItemKind.Method;
+					allMethods.push(item);
 				});
+				
 				definitions.FieldStrings.forEach((value:string) =>
 				{
-					allMethods.push(CompletionItem.create(value));
+					let item: CompletionItem = CompletionItem.create(value);
+					item.kind = CompletionItemKind.Property;
+					allMethods.push(item);
 				});
-				return allMethods;
+
+
+				let map:Map<string, CompletionItem> = new Map();
+
+				for(let i = 0 ; i < allMethods.length; ++i)
+				{
+					map.set(allMethods[i].label, allMethods[i]);
+				}
+
+				return Array.from(map.values());
 			}
 		}
 
-	
+		let variableMap:Map<string, CompletionItem> = new Map();
+
+		for(let i = 0 ; i < variables.length; ++i)
+		{
+			variableMap.set(variables[i].label, variables[i]);
+		}
+
+		variables = Array.from(variableMap.values());
+
 		return defines.concat(methodmaps).concat(variables);
 	}
 );
