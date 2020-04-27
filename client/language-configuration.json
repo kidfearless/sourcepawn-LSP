@@ -84,8 +84,8 @@
 	],
 	"folding": {
 		"markers": {
-			"start": "^\\s*(#region|#if)\\b",
-			"end": "^\\s*(#endregion|#endif)\\b"
+			"start": "^\\s*(\\/\\/)?\\s*(#region|#if|{)\\s*$",
+			"end": "^\\s*(\\/\\/)?\\s*(#endregion|#endif|})\\s*$"
 		}
 	},
 	"indentationRules": {
